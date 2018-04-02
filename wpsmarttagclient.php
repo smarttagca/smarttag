@@ -4,8 +4,6 @@ Plugin Name:SmartTag Client
 Plugin URI: https://smarttag.ca
 Description: SmartTag uses advanced Internet search technology and Artificial Intelligence to find relevant keywords for your content.
 Version: 1.0
-Author: SmartTag
-Author URI: https://smarttag.ca
 */
 
 $wp_smart_tag_url = "https://smarttag.ca/api/";
