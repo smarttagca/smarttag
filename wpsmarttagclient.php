@@ -2,19 +2,15 @@
 /*
 Plugin Name:SmartTag Client
 Plugin URI: https://smarttag.ca
-Description: SmartTag uses advanced Internet search technology and Artificial Intelligence to find relevant keywords for your content.
+Description: Auto generate WordPress tags & keywords improve SEO and content searchability using Artificial Intelligence. SmartTag uses advanced Internet search technology and Artificial Intelligence to find relevant keywords for your content.
 Version: 1.0
+Author: SmartTag
+Author URI: https://smarttag.ca
 */
 
 $wp_smart_tag_url = "https://smarttag.ca/api/";
 
-//$wp_smart_tag_url = "http://localhost/api/";
-
-
 include('wpsmarttag-admin.php');
-
-
-
 
 add_action( 'add_meta_boxes', 'wp_smart_tag_create_meta_box' );
 function wp_smart_tag_create_meta_box()
@@ -68,40 +64,6 @@ function wp_smart_tag_meta_box()
 }
 
 
-//ADD NEW POST NOTIFICATIONS
-function wp_smart_post_published_notification( $ID, $post ) {
-	
-   global $wpdb;
-
-	
-    $author = $post->post_author; /* Post author ID. */
-    $name = get_the_author_meta( 'display_name', $author );
-    $email = get_the_author_meta( 'user_email', $author );
-    $title = $post->post_title;
-    $permalink = get_permalink( $ID );
-	
-	$ch = curl_init();
-	curl_setopt($ch, CURLOPT_URL,$wp_smart_tag_url."/queuecontent");
-	curl_setopt($ch, CURLOPT_POST, 1);
-	curl_setopt($ch, CURLOPT_POSTFIELDS,"url=".$permalink);
-
-	// receive server response ...
-	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-	$server_output = curl_exec ($ch);
-	curl_close ($ch);
-	
-	//echo "wp-posted";
-
-	add_action( 'admin_notices', 'sample_admin_notice__success' );
-	
-
-	
-}
-//add_action('publish_page', 'wp_smart_post_published_notification');
-//add_action('publish_post'. 'wp_smart_post_published_notification');
-
-
-
 function sample_admin_notice__success() {
 	?>
 	<div class="notice notice-success is-dismissible">
@@ -131,47 +93,52 @@ function wpst_ajax() {
 		$content = urldecode($_POST['content']);
 		$content = strip_shortcodes(preg_replace($patterns, '', $content));		
 		
-		$fields = array(
-		'content' =>  $content,
-		'apikey' => $apikey,
-		'apiemail' => $apiemail,
-		'do' => 'getkeywordscontent',
+		$body = array(
+			'content' =>  $content,
+			'apikey' => $apikey,
+			'apiemail' => $apiemail,
+			'do' => 'getkeywordscontent',
 		);
 		
-		$ch = curl_init();
-		curl_setopt($ch, CURLOPT_URL,$wp_smart_tag_url);
-		curl_setopt($ch, CURLOPT_POST, count($fields));
-		curl_setopt($ch, CURLOPT_POSTFIELDS,$fields);
-
-		// receive server response ...
-		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-		$server_output = curl_exec ($ch);
-		curl_close ($ch);
+		$args = array(
+			'body' => $body,
+			'timeout' => '5',
+			'redirection' => '5',
+			'httpversion' => '1.0',
+			'blocking' => true,
+			'headers' => array(),
+			'cookies' => array()
+		);
 		
-		echo( $server_output);
+		$server_output = wp_remote_post( $wp_smart_tag_url, $args );		
+		
+		
+		echo($server_output['body']);
 	}
 	
 	if($_POST['do']=='getkeyword'){
 		
 		
-		$fields = array(
+		$body = array(
 		'keyword' => $_POST['keyword'],
 		'apikey' => $apikey,
 		'apiemail' => $apiemail,
 		'do' => 'getkeyword',
 		);
 		
-		$ch = curl_init();
-		curl_setopt($ch, CURLOPT_URL,$wp_smart_tag_url);
-		curl_setopt($ch, CURLOPT_POST, count($fields));
-		curl_setopt($ch, CURLOPT_POSTFIELDS,$fields);
-
-		// receive server response ...
-		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-		$server_output = curl_exec ($ch);
-		curl_close ($ch);
+		$args = array(
+			'body' => $body,
+			'timeout' => '5',
+			'redirection' => '5',
+			'httpversion' => '1.0',
+			'blocking' => true,
+			'headers' => array(),
+			'cookies' => array()
+		);
 		
-		echo( $server_output);
+		$server_output = wp_remote_post( $wp_smart_tag_url, $args );		
+		
+		echo( $server_output['body']);
 	}
 	
 	

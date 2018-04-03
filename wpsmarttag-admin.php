@@ -18,8 +18,8 @@ function wp_smarttag_admin_options(){
 	
 	if($_GET['submit']=='apikey' && $_POST['apikey']){
 			
-			$sendApiKey=strip_tags($_POST['apikey']);
-			$sendEmail=strip_tags($_POST['email']);
+			$sendApiKey=sanitize_text_field(trim(strip_tags($_POST['apikey'])));
+			$sendEmail=sanitize_email(trim(strip_tags($_POST['email'])));
 			wp_smarttag_admin_api_submit($sendApiKey,$sendEmail);
 	
 	}
@@ -45,7 +45,6 @@ function wp_smarttag_admin_options(){
 	
 	echo '<h2>SmartTag</h2>';
 	
-	
 	echo '</div>';
 	
 	echo '<h3>Welcome to SmartTag Settings. Please enter your API key below. If you do not have an API key please visit <a href="https://smarttag.ca/" target="_blank">https://smarttag.ca/</a> to create an account</h3>';
@@ -64,28 +63,27 @@ function wp_smarttag_admin_options(){
 function wp_smarttag_admin_api_submit($key,$email){
 	global $wp_smart_tag_url;
 	
-	//echo $key;
-	//echo $email;
-	//echo $wp_smart_tag_url;
-	
-	$fields = array(
-		'apikey' => trim(strip_tags($key)),
-		'apiemail' => trim(strip_tags($email)),
-		'do' => 'verifyapikey',
+
+		
+		$body = array(
+			'apikey' =>  sanitize_text_field(trim(strip_tags($key))),
+			'apiemail' => sanitize_email(trim(strip_tags($email))),
+			'do' => 'verifyapikey',
 		);
 		
-		$ch = curl_init();
-		curl_setopt($ch, CURLOPT_URL,$wp_smart_tag_url);
-		curl_setopt($ch, CURLOPT_POST, count($fields));
-		curl_setopt($ch, CURLOPT_POSTFIELDS,$fields);
-
-		// receive server response ...
-		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-		$server_output = curl_exec ($ch);
-		curl_close ($ch);
-	
-		$response = json_decode($server_output,true);
-		//echo "here";
+		$args = array(
+			'body' => $body,
+			'timeout' => '5',
+			'redirection' => '5',
+			'httpversion' => '1.0',
+			'blocking' => true,
+			'headers' => array(),
+			'cookies' => array()
+		);
+		
+		$response = wp_remote_post( $wp_smart_tag_url, $args );		
+		
+		$response = json_decode($response['body'],true);
 		//print_r($response);
 		
 		if($response['msg'] == 'valid'){
