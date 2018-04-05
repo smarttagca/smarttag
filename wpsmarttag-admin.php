@@ -16,30 +16,31 @@ function wp_smarttag_admin_options(){
 		wp_die( __( 'You do not have sufficient permissions to access this page.' ) );
 	}
 	
-	if($_GET['submit']=='apikey' && $_POST['apikey']){
-			
-			$sendApiKey=sanitize_text_field(trim(strip_tags($_POST['apikey'])));
-			$sendEmail=sanitize_email(trim(strip_tags($_POST['email'])));
-			wp_smarttag_admin_api_submit($sendApiKey,$sendEmail);
-	
-	}
-	
-	//get  creds
-	$smarttag_apikey = '';
-	$smarttag_email = '';
-	if(get_option( 'wp_smarttag_apikey' )){
+		
+		if($_GET['submit']=='apikey' && $_POST['apikey']){
+			if(check_admin_referer( 'smarttag_api')){
+				
+				$sendApiKey=sanitize_text_field(trim(strip_tags($_POST['apikey'])));
+				$sendEmail=sanitize_email(trim(strip_tags($_POST['email'])));
+				wp_smarttag_admin_api_submit($sendApiKey,$sendEmail);
+			}
+		}
+		
+		//get  creds
+		$smarttag_apikey = '';
+		$smarttag_email = '';
+		if(get_option( 'wp_smarttag_apikey' )){
 
-		$smarttag_apikey = get_option( 'wp_smarttag_apikey' );
-	
-	}
-	//get creds
-	if(get_option( 'wp_smarttag_email' )){
+			$smarttag_apikey = get_option( 'wp_smarttag_apikey' );
+		
+		}
+		//get creds
+		if(get_option( 'wp_smarttag_email' )){
 
-		$smarttag_email = get_option( 'wp_smarttag_email' );
+			$smarttag_email = get_option( 'wp_smarttag_email' );
+		
+		}
 	
-	}
-	
-
 	
 	echo '<div class="wrap">';
 	
@@ -52,6 +53,9 @@ function wp_smarttag_admin_options(){
 	echo '<form action="?page=SmartTag-options&submit=apikey" method="post">';
 		echo '<div>API Key: <input class="regular-text" name="apikey" id="smarttag_api" type="text" value="'.$smarttag_apikey.'"></div>';
 		echo '<div>Account Email: <input class="regular-text" name="email" id="smarttag_api" type="text" value="'.$smarttag_email.'"></div>';
+		
+		echo wp_nonce_field('smarttag_api');
+		
 		echo '<input id="smarttag_api" class="button button-primary" type="submit" value="Save Settings">';
 	echo '</form>';
 	
